@@ -14,7 +14,20 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "phone_number",
             "profile_image",
+            "provider",
+            "created_at",
+            "updated_at",
         ]
+        read_only_fields = ["id", "provider", "created_at", "updated_at"]
+
+
+class UserProfileUpdateSerializer(serializers.Serializer):
+    """사용자 프로필 수정용 Serializer"""
+
+    username = serializers.CharField(max_length=255, required=False)
+    email = serializers.EmailField(required=False)
+    phone_number = serializers.CharField(max_length=20, required=False)
+    profile_image = serializers.ImageField(required=False)
 
 
 class UserSimpleSerializer(serializers.ModelSerializer):

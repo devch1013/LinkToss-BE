@@ -44,7 +44,11 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("health/", health_check, name="health-check"),
+    # API endpoints
     path("users/", include("api.user.urls")),
+    path("decks/", include("api.deck.urls")),
+    path("drops/", include("api.drop.urls")),
     # Swagger URLs
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",

@@ -11,6 +11,7 @@ from config.settings.third_party.aws_settings import AWSConfig
 
 class S3KeyPrefix(Enum):
     EXAMPLE = "example"
+    PROFILE = "profile"
 
 
 class S3UploadUtil:
