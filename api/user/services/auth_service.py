@@ -20,8 +20,8 @@ class AuthService(ABC):
 
 
 class FirebaseAuthService(AuthService):
-    def get_or_create_user(self, id_token: str, fcmToken: str, name: str = None):
-        return self._create_user(id_token, fcmToken, name)
+    def get_or_create_user(self, id_token: str, name: str = None):
+        return self._create_user(id_token, name)
 
     def _verify_firebase_token(self, id_token: str):
         """Firebase ID Token 검증"""
@@ -38,7 +38,7 @@ class FirebaseAuthService(AuthService):
             logger.error(f"Firebase token verification failed: {e}")
             return None
 
-    def _create_user(self, id_token: str, fcmToken: str, name: str):
+    def _create_user(self, id_token: str, name: str):
         if not id_token:
             raise CustomException(OAuthCustomExceptions.INVALID_TOKEN)
 
@@ -62,10 +62,6 @@ class FirebaseAuthService(AuthService):
                 "provider": provider,
             },
         )
-
-        if fcmToken:
-            user.fcm_token = fcmToken
-            user.save()
 
         return user
 

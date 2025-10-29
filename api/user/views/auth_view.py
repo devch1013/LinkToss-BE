@@ -86,9 +86,8 @@ class SocialAuthView(
         else:
             # Firebase 로그인: request body에서 id_token과 fcmToken 가져오기
             id_token = request_data.get("id_token")
-            fcm_token = request_data.get("fcmToken")
 
-            user = service.get_or_create_user(id_token, fcm_token)
+            user = service.get_or_create_user(id_token)
 
         refresh = service.get_token(user)
         return Response(
