@@ -1,3 +1,3 @@
-from .deck import Deck
+from .drop import Drop
 
-__all__ = ["Deck"]
+__all__ = ["Drop"]
