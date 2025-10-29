@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from api.deck.serializers import (
     DeckCreateSerializer,
+    DeckDetailSerializer,
     DeckSerializer,
     DeckTreeSerializer,
     DeckUpdateSerializer,
@@ -60,8 +61,8 @@ class DeckViewSet(viewsets.ViewSet):
 
     @swagger_auto_schema(
         operation_summary="Deck 상세 조회",
-        operation_description="특정 deck의 상세 정보를 조회합니다.",
-        responses={200: DeckSerializer(), 404: "Deck not found"},
+        operation_description="특정 deck의 상세 정보를 조회합니다. sub-deck과 drops 정보를 포함합니다.",
+        responses={200: DeckDetailSerializer(), 404: "Deck not found"},
     )
     def retrieve(self, request, pk=None):
         """Deck 상세 조회"""
@@ -77,7 +78,7 @@ class DeckViewSet(viewsets.ViewSet):
                 {"error": "Deck not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = DeckSerializer(deck)
+        serializer = DeckDetailSerializer(deck)
         return Response(serializer.data)
 
     @swagger_auto_schema(

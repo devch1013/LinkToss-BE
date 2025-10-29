@@ -1,6 +1,15 @@
 from rest_framework import serializers
 
 from api.deck.models.deck import Deck
+from api.drop.serializers.drop_serializer import DropSerializer
+
+
+class BreadcrumbSerializer(serializers.ModelSerializer):
+    """Breadcrumb 정보용 Serializer"""
+
+    class Meta:
+        model = Deck
+        fields = ["id", "name"]
 
 
 class DeckSerializer(serializers.ModelSerializer):
@@ -117,3 +126,37 @@ class DeckTreeSerializer(serializers.ModelSerializer):
         """재귀적으로 children 조회"""
         children = obj.children.filter(is_deleted=False).order_by("order")
         return DeckTreeSerializer(children, many=True).data
+
+
+class DeckDetailSerializer(serializers.ModelSerializer):
+    """Deck 상세 조회용 Serializer (sub-deck과 drops 포함)"""
+
+    depth = serializers.IntegerField(read_only=True)
+    children_count = serializers.SerializerMethodField()
+    breadcrumb = BreadcrumbSerializer(many=True, read_only=True)
+    children = DeckSerializer(many=True, read_only=True)
+    drops = DropSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Deck
+        fields = [
+            "id",
+            "name",
+            "description",
+            "color_hex",
+            "parent",
+            "order",
+            "is_public",
+            "depth",
+            "children_count",
+            "breadcrumb",
+            "children",
+            "drops",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]
+
+    def get_children_count(self, obj):
+        """하위 children 개수"""
+        return obj.children.filter(is_deleted=False).count()
