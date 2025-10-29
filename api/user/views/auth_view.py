@@ -1,4 +1,3 @@
-from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from loguru import logger
 from rest_framework import mixins, status
@@ -46,16 +45,6 @@ class SocialAuthView(
         
         성공 시 JWT 토큰을 반환합니다.
         """,
-        manual_parameters=[
-            openapi.Parameter(
-                "provider",
-                openapi.IN_PATH,
-                description="로그인 제공업체 (google, apple, native)",
-                type=openapi.TYPE_STRING,
-                required=True,
-                enum=["google", "apple", "native"],
-            ),
-        ],
         query_serializer=SocialLoginQuerySerializer,
         request_body=SocialLoginRequestSerializer,
         responses={

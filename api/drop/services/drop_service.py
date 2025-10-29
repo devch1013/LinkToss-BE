@@ -151,6 +151,15 @@ class DropService:
             )
         )
 
+    @classmethod
+    def get_recent_drops(cls, user: User, limit: int = 10) -> QuerySet[Drop]:
+        """사용자의 최근 drop 목록 조회 (시간순)"""
+        return (
+            Drop.objects.filter(user=user, deleted_at__isnull=True)
+            .prefetch_related("tag_drop_mappings__tag")
+            .order_by("-created_at")[:limit]
+        )
+
     # Internal helper methods
 
     @classmethod

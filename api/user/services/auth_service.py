@@ -26,7 +26,7 @@ class FirebaseAuthService(AuthService):
     def _verify_firebase_token(self, id_token: str):
         """Firebase ID Token 검증"""
         try:
-            decoded_token = auth.verify_id_token(id_token)
+            decoded_token = auth.verify_id_token(id_token, clock_skew_seconds=10)
             return decoded_token
         except auth.InvalidIdTokenError:
             logger.error("Invalid Firebase ID token")
