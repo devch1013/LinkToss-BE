@@ -16,7 +16,7 @@ class CommentService:
         return Comment.objects.filter(
             drop_id=drop_id,
             parent__isnull=True,
-            deleted_at__isnull=True,
+            is_deleted=False,
         ).select_related("user", "drop")
 
     @classmethod
@@ -24,7 +24,7 @@ class CommentService:
         """comment ID로 단일 조회"""
         try:
             return Comment.objects.select_related("user", "drop", "parent").get(
-                id=comment_id, deleted_at__isnull=True
+                id=comment_id, is_deleted=False
             )
         except Comment.DoesNotExist:
             return None
@@ -33,7 +33,7 @@ class CommentService:
     def get_comment_replies(cls, comment_id: UUID) -> QuerySet[Comment]:
         """특정 댓글의 대댓글 조회"""
         return Comment.objects.filter(
-            parent_id=comment_id, deleted_at__isnull=True
+            parent_id=comment_id, is_deleted=False
         ).select_related("user", "drop")
 
     @classmethod
@@ -48,7 +48,7 @@ class CommentService:
         """새로운 댓글 생성"""
         # drop 존재 확인
         try:
-            drop = Drop.objects.get(id=drop_id, deleted_at__isnull=True)
+            drop = Drop.objects.get(id=drop_id, is_deleted=False)
         except Drop.DoesNotExist:
             raise ValueError(f"Drop with id {drop_id} not found")
 
@@ -106,9 +106,9 @@ class CommentService:
     @classmethod
     def get_comment_tree(cls, comment: Comment) -> QuerySet[Comment]:
         """댓글의 전체 대댓글 트리 조회 (재귀적)"""
-        return Comment.objects.filter(
-            parent=comment, deleted_at__isnull=True
-        ).select_related("user", "drop")
+        return Comment.objects.filter(parent=comment, is_deleted=False).select_related(
+            "user", "drop"
+        )
 
     # Internal helper methods
 
@@ -123,7 +123,7 @@ class CommentService:
     @classmethod
     def _soft_delete_recursive(cls, comment: Comment):
         """댓글과 하위 대댓글을 재귀적으로 soft delete"""
-        replies = Comment.objects.filter(parent=comment, deleted_at__isnull=True)
+        replies = Comment.objects.filter(parent=comment, is_deleted=False)
         for reply in replies:
             cls._soft_delete_recursive(reply)
 

@@ -28,7 +28,7 @@ class DeckSerializer(serializers.ModelSerializer):
 
     def get_children_count(self, obj):
         """하위 children 개수"""
-        return obj.children.filter(deleted_at__isnull=True).count()
+        return obj.children.filter(is_deleted=False).count()
 
 
 class DeckCreateSerializer(serializers.ModelSerializer):
@@ -115,5 +115,5 @@ class DeckTreeSerializer(serializers.ModelSerializer):
 
     def get_children(self, obj):
         """재귀적으로 children 조회"""
-        children = obj.children.filter(deleted_at__isnull=True).order_by("order")
+        children = obj.children.filter(is_deleted=False).order_by("order")
         return DeckTreeSerializer(children, many=True).data

@@ -26,7 +26,7 @@ class DropSerializer(serializers.ModelSerializer):
     def get_tags(self, obj):
         """Drop에 연결된 태그 이름 목록"""
         return list(
-            obj.tag_drop_mappings.filter(tag__deleted_at__isnull=True).values_list(
+            obj.tag_drop_mappings.filter(tag__is_deleted=False).values_list(
                 "tag__name", flat=True
             )
         )

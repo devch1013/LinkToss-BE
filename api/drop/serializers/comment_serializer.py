@@ -26,7 +26,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_replies_count(self, obj):
         """대댓글 개수"""
-        return obj.replies.filter(deleted_at__isnull=True).count()
+        return obj.replies.filter(is_deleted=False).count()
 
 
 class CommentCreateSerializer(serializers.Serializer):
@@ -66,5 +66,5 @@ class CommentTreeSerializer(serializers.ModelSerializer):
 
     def get_replies(self, obj):
         """재귀적으로 replies 조회"""
-        replies = obj.replies.filter(deleted_at__isnull=True).order_by("created_at")
+        replies = obj.replies.filter(is_deleted=False).order_by("created_at")
         return CommentTreeSerializer(replies, many=True).data

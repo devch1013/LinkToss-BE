@@ -79,6 +79,7 @@ class SocialAuthView(
             user = service.get_or_create_user(id_token)
 
         refresh = service.get_token(user)
+        logger.info(f"refresh: {str(refresh.access_token)}")
         return Response(
             TokenSerializer(
                 {

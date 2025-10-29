@@ -15,7 +15,7 @@ class DropService:
     def get_deck_drops(cls, deck_id: UUID, user: User) -> QuerySet[Drop]:
         """특정 deck의 drop 목록 조회"""
         return Drop.objects.filter(
-            deck_id=deck_id, user=user, deleted_at__isnull=True
+            deck_id=deck_id, user=user, is_deleted=False
         ).prefetch_related("tag_drop_mappings__tag")
 
     @classmethod
@@ -23,17 +23,20 @@ class DropService:
         """drop ID로 단일 조회"""
         try:
             return Drop.objects.prefetch_related("tag_drop_mappings__tag").get(
-                id=drop_id, user=user, deleted_at__isnull=True
+                id=drop_id, user=user, is_deleted=False
             )
         except Drop.DoesNotExist:
             return None
 
     @classmethod
     def search_drops(
-        cls, user: User, query: Optional[str] = None, tag_names: Optional[List[str]] = None
+        cls,
+        user: User,
+        query: Optional[str] = None,
+        tag_names: Optional[List[str]] = None,
     ) -> QuerySet[Drop]:
         """drop 검색 (제목, 내용, 메모, 태그로 검색)"""
-        drops = Drop.objects.filter(user=user, deleted_at__isnull=True)
+        drops = Drop.objects.filter(user=user, is_deleted=False)
 
         if query:
             from django.db.models import Q
@@ -68,7 +71,7 @@ class DropService:
         """새로운 drop 생성 (태그 포함)"""
         # deck 존재 확인
         try:
-            deck = Deck.objects.get(id=deck_id, user=user, deleted_at__isnull=True)
+            deck = Deck.objects.get(id=deck_id, user=user, is_deleted=False)
         except Deck.DoesNotExist:
             raise ValueError(f"Deck with id {deck_id} not found")
 
@@ -117,7 +120,7 @@ class DropService:
         # deck 변경
         if deck_id is not None:
             try:
-                deck = Deck.objects.get(id=deck_id, user=user, deleted_at__isnull=True)
+                deck = Deck.objects.get(id=deck_id, user=user, is_deleted=False)
                 drop.deck = deck
             except Deck.DoesNotExist:
                 raise ValueError(f"Deck with id {deck_id} not found")
@@ -146,7 +149,7 @@ class DropService:
     def get_drop_tags(cls, drop: Drop) -> List[str]:
         """drop의 태그 목록 조회"""
         return list(
-            drop.tag_drop_mappings.filter(tag__deleted_at__isnull=True).values_list(
+            drop.tag_drop_mappings.filter(tag__is_deleted=False).values_list(
                 "tag__name", flat=True
             )
         )
@@ -155,7 +158,7 @@ class DropService:
     def get_recent_drops(cls, user: User, limit: int = 10) -> QuerySet[Drop]:
         """사용자의 최근 drop 목록 조회 (시간순)"""
         return (
-            Drop.objects.filter(user=user, deleted_at__isnull=True)
+            Drop.objects.filter(user=user, is_deleted=False)
             .prefetch_related("tag_drop_mappings__tag")
             .order_by("-created_at")[:limit]
         )

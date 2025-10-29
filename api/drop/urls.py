@@ -5,7 +5,7 @@ from api.drop.views.comment_viewset import CommentViewSet
 from api.drop.views.drop_viewset import DropViewSet
 
 router = DefaultRouter()
-router.register(r"drops", DropViewSet, basename="drop")
+router.register("", DropViewSet, basename="drop")
 router.register(r"comments", CommentViewSet, basename="comment")
 
 urlpatterns = [

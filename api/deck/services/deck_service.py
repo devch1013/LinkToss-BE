@@ -14,13 +14,13 @@ class DeckService:
         cls, user: User, parent: Optional[Deck] = None
     ) -> QuerySet[Deck]:
         """사용자의 deck 목록 조회 (특정 parent의 children만)"""
-        return Deck.objects.filter(user=user, parent=parent, deleted_at__isnull=True)
+        return Deck.objects.filter(user=user, parent=parent, is_deleted=False)
 
     @classmethod
     def get_deck_by_id(cls, deck_id: UUID, user: User) -> Optional[Deck]:
         """deck ID로 단일 조회"""
         try:
-            return Deck.objects.get(id=deck_id, user=user, deleted_at__isnull=True)
+            return Deck.objects.get(id=deck_id, user=user, is_deleted=False)
         except Deck.DoesNotExist:
             return None
 
@@ -117,14 +117,10 @@ class DeckService:
             deck = cls.get_deck_by_id(deck_id, user)
             if not deck:
                 return Deck.objects.none()
-            return Deck.objects.filter(
-                user=user, parent=deck, deleted_at__isnull=True
-            )
+            return Deck.objects.filter(user=user, parent=deck, is_deleted=False)
         else:
             # root decks (parent가 None인 것들)
-            return Deck.objects.filter(
-                user=user, parent__isnull=True, deleted_at__isnull=True
-            )
+            return Deck.objects.filter(user=user, parent__isnull=True, is_deleted=False)
 
     # Internal helper methods
 
@@ -140,7 +136,7 @@ class DeckService:
     def _get_next_order(cls, user: User, parent: Optional[Deck]) -> int:
         """다음 order 값 계산"""
         last_deck = (
-            Deck.objects.filter(user=user, parent=parent, deleted_at__isnull=True)
+            Deck.objects.filter(user=user, parent=parent, is_deleted=False)
             .order_by("-order")
             .first()
         )
@@ -158,7 +154,7 @@ class DeckService:
     @classmethod
     def _soft_delete_recursive(cls, deck: Deck):
         """deck과 하위 children을 재귀적으로 soft delete"""
-        children = Deck.objects.filter(parent=deck, deleted_at__isnull=True)
+        children = Deck.objects.filter(parent=deck, is_deleted=False)
         for child in children:
             cls._soft_delete_recursive(child)
 
