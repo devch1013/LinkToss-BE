@@ -131,9 +131,6 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "common.authentication.custom_jwt_authentication.CustomJWTAuthentication",
     ),
-    "DEFAULT_RENDERER_CLASSES": (
-        "common.renderer.custom_json_renderer.CustomJSONRenderer",
-    ),
     "EXCEPTION_HANDLER": "common.exceptions.exception_handler.custom_exception_handler",
 }
 
@@ -153,3 +150,4 @@ SWAGGER_SETTINGS = {
 
 from .third_party.firebase_settings import *  # noqa
 from .third_party.jwt_settings import *  # noqa
+from .third_party.aws_settings import *  # noqa
