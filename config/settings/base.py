@@ -17,6 +17,7 @@ AUTH_USER_MODEL = "user.User"
 
 LOCAL_APPS = [
     "api.user",
+    "api.deck",
 ]
 
 THIRD_PARTY_APPS = [
