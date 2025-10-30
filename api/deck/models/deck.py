@@ -49,7 +49,7 @@ class Deck(TimeStampModel, SoftDeleteModel):
         """최상위 root부터 현재 deck까지의 경로"""
         ancestors = self.get_ancestors()
         # 상위 deck들과 현재 deck을 모두 포함
-        return ancestors + [self]
+        return ancestors
 
     def get_ancestors(self):
         """상위 deck 리스트 반환 (root부터)"""
