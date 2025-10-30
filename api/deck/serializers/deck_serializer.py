@@ -2,14 +2,7 @@ from rest_framework import serializers
 
 from api.deck.models.deck import Deck
 from api.drop.serializers.drop_serializer import DropSerializer
-
-
-class BreadcrumbSerializer(serializers.ModelSerializer):
-    """Breadcrumb 정보용 Serializer"""
-
-    class Meta:
-        model = Deck
-        fields = ["id", "name"]
+from common.serializers.breadcrumb_serializer import BreadcrumbSerializer
 
 
 class DeckSerializer(serializers.ModelSerializer):

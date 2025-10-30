@@ -29,3 +29,10 @@ class Drop(TimeStampModel, SoftDeleteModel):
 
     def __str__(self):
         return self.title
+
+    @property
+    def breadcrumb(self):
+        """최상위 root부터 현재 deck까지의 경로"""
+        ancestors = self.deck.get_ancestors()
+        # 상위 deck들과 현재 deck을 모두 포함
+        return ancestors + [self.deck]

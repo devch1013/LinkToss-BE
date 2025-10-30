@@ -12,6 +12,7 @@ from api.drop.serializers import (
     DropSerializer,
     DropUpdateSerializer,
 )
+from api.drop.serializers.drop_serializer import DropDetailSerializer
 from api.drop.services.drop_service import DropService
 
 
@@ -57,7 +58,7 @@ class DropViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         operation_summary="Drop 상세 조회",
         operation_description="특정 drop의 상세 정보를 조회합니다.",
-        responses={200: DropSerializer(), 404: "Drop not found"},
+        responses={200: DropDetailSerializer(), 404: "Drop not found"},
     )
     def retrieve(self, request, pk=None):
         """Drop 상세 조회"""
@@ -73,7 +74,7 @@ class DropViewSet(viewsets.ViewSet):
                 {"error": "Drop not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = DropSerializer(drop)
+        serializer = DropDetailSerializer(drop)
         return Response(serializer.data)
 
     @swagger_auto_schema(
