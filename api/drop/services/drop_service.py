@@ -8,6 +8,8 @@ from api.deck.models.deck import Deck
 from api.drop.models.drop import Drop
 from api.drop.models.tag import Tag, TagDropMapping
 from api.user.models.user import User
+from common.utils.s3_utils import S3KeyPrefix, S3UploadUtil
+from common.utils.web_scraper_utils import WebScraperUtil
 
 
 class DropService:
@@ -75,6 +77,22 @@ class DropService:
         except Deck.DoesNotExist:
             raise ValueError(f"Deck with id {deck_id} not found")
 
+        # 웹페이지 메타데이터 가져오기
+        favicon_url, screenshot_url, meta_image_url = (
+            WebScraperUtil.fetch_page_metadata(url)
+        )
+
+        # 이미지 URL 처리 (data URI나 public URL이 아닌 경우 S3에 업로드)
+        favicon_final_url = cls._process_image_url(
+            favicon_url, drop_id=None, prefix=S3KeyPrefix.DROP_FAVICON
+        )
+        screenshot_final_url = cls._process_image_url(
+            screenshot_url, drop_id=None, prefix=S3KeyPrefix.DROP_SCREENSHOT
+        )
+        meta_image_final_url = cls._process_image_url(
+            meta_image_url, drop_id=None, prefix=S3KeyPrefix.DROP_META_IMAGE
+        )
+
         drop = Drop.objects.create(
             user=user,
             deck=deck,
@@ -82,6 +100,9 @@ class DropService:
             url=url,
             content=content,
             memo=memo,
+            favicon_url=favicon_final_url,
+            screenshot_url=screenshot_final_url,
+            meta_image_url=meta_image_final_url,
         )
 
         # 태그 처리
@@ -180,3 +201,75 @@ class DropService:
 
             # 매핑 생성 (중복 방지)
             TagDropMapping.objects.get_or_create(tag=tag, drop=drop)
+
+    @classmethod
+    def _process_image_url(
+        cls,
+        image_url: Optional[str],
+        drop_id: Optional[UUID],
+        prefix: S3KeyPrefix,
+    ) -> Optional[str]:
+        """
+        이미지 URL을 처리합니다.
+        - data URI나 public URL은 그대로 반환
+        - 그 외의 경우 이미지를 다운로드하여 S3에 업로드
+
+        Args:
+            image_url: 원본 이미지 URL
+            drop_id: Drop ID (S3 키 생성용, None인 경우 임시 UUID 생성)
+            prefix: S3 키 프리픽스
+
+        Returns:
+            최종 이미지 URL (S3 URL 또는 원본 URL)
+        """
+        if not image_url:
+            return None
+
+        # data URI는 그대로 반환 (퍼블릭 URL)
+        if WebScraperUtil.is_data_uri(image_url):
+            return image_url
+
+        # 일반 HTTP/HTTPS URL인 경우
+        if image_url.startswith("http://") or image_url.startswith("https://"):
+            # 이미지를 다운로드하여 S3에 업로드
+            try:
+                image_data = WebScraperUtil.download_image(image_url)
+                if not image_data:
+                    # 다운로드 실패시 원본 URL 반환
+                    return image_url
+
+                # S3에 업로드
+                import uuid as uuid_module
+
+                file_id = drop_id if drop_id else uuid_module.uuid4()
+
+                # 확장자 추출
+                from urllib.parse import urlparse
+                import os
+
+                parsed = urlparse(image_url)
+                ext = os.path.splitext(parsed.path)[1]
+                if not ext or len(ext) > 10:
+                    ext = ".jpg"  # 기본 확장자
+
+                file_name = f"image{ext}"
+                content_type = WebScraperUtil.get_content_type_from_url(image_url)
+
+                _, s3_url = S3UploadUtil.upload_bytes(
+                    file_id=file_id,
+                    file_data=image_data,
+                    prefix=prefix,
+                    file_name=file_name,
+                    content_type=content_type,
+                )
+
+                # S3 업로드 성공시 S3 URL 반환, 실패시 원본 URL 반환
+                return s3_url if s3_url else image_url
+
+            except Exception as e:
+                print(f"Error processing image URL {image_url}: {str(e)}")
+                # 에러 발생시 원본 URL 반환
+                return image_url
+
+        # 그 외의 경우 원본 URL 반환
+        return image_url

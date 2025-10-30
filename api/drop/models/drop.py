@@ -16,6 +16,9 @@ class Drop(TimeStampModel, SoftDeleteModel):
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="drops")
     url = models.URLField()
     memo = models.TextField(blank=True, null=True)
+    favicon_url = models.URLField(blank=True, null=True)
+    screenshot_url = models.URLField(blank=True, null=True)
+    meta_image_url = models.URLField(blank=True, null=True)
 
     class Meta:
         db_table = "drops"

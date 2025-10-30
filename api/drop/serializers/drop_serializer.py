@@ -18,6 +18,9 @@ class DropSerializer(serializers.ModelSerializer):
             "memo",
             "deck",
             "tags",
+            "favicon_url",
+            "screenshot_url",
+            "meta_image_url",
             "created_at",
             "updated_at",
         ]

@@ -12,6 +12,9 @@ from config.settings.third_party.aws_settings import AWSConfig
 class S3KeyPrefix(Enum):
     EXAMPLE = "example"
     PROFILE = "profile"
+    DROP_FAVICON = "drop/favicon"
+    DROP_SCREENSHOT = "drop/screenshot"
+    DROP_META_IMAGE = "drop/meta_image"
 
 
 class S3UploadUtil:
